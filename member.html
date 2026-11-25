@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>沐森集團 會員中心</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+         background: #f3f4f1; color: #222; }
+  .wrap { max-width: 440px; margin: 0 auto; padding: 20px 16px 40px; }
+  h1 { font-size: 20px; margin: 4px 0 16px; }
+  .hidden { display: none !important; }
+  .panel { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .tabs button { flex: 1; padding: 10px; border: 1px solid #ccd; background: #fff; border-radius: 10px; font-size: 15px; }
+  .tabs button.on { background: #2f5d50; color: #fff; border-color: #2f5d50; }
+  label { display: block; font-size: 14px; margin: 12px 0 4px; color: #555; }
+  input, select { width: 100%; padding: 11px; font-size: 16px; border: 1px solid #ccd; border-radius: 8px; background: #fff; }
+  .consent { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: #555; margin-top: 14px; }
+  .consent input { width: auto; margin-top: 3px; }
+  .btn { width: 100%; margin-top: 18px; padding: 13px; font-size: 16px; border: 0; border-radius: 10px;
+         background: #06c755; color: #fff; font-weight: 600; }
+  .btn:disabled { opacity: .5; }
+  .err { color: #c0392b; font-size: 14px; margin-top: 10px; min-height: 1em; }
+  .hint { font-size: 13px; color: #777; margin-top: 6px; }
+
+  .card { border-radius: 16px; padding: 22px 20px 18px; color: #fff; position: relative;
+          box-shadow: 0 6px 18px rgba(0,0,0,.18); aspect-ratio: 1.586 / 1; display: flex; flex-direction: column; }
+  .card.staff  { background: linear-gradient(135deg, #2f5d50, #1d3a32); }
+  .card.rotary { background: linear-gradient(135deg, #17458f, #0d2a5c); }
+  .card .brand { font-size: 14px; letter-spacing: 2px; opacity: .85; }
+  .card .ctype { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .card .name  { margin-top: auto; font-size: 18px; }
+  .card .unit  { font-size: 13px; opacity: .8; }
+  .card .no    { font-size: 30px; font-weight: 700; letter-spacing: 6px; font-variant-numeric: tabular-nums; margin-top: 6px; }
+  .badge { position: absolute; top: 18px; right: 18px; font-size: 12px; padding: 3px 10px; border-radius: 20px;
+           background: rgba(255,255,255,.2); }
+  .badge.pending { background: #f5b301; color: #222; }
+  .barcode { background: #fff; border-radius: 12px; margin-top: 16px; padding: 14px; text-align: center; }
+  .barcode svg { width: 100%; height: auto; }
+  .note { font-size: 13px; color: #666; text-align: center; margin-top: 10px; }
+  .loading { text-align: center; padding: 60px 0; color: #777; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>沐森集團 會員中心</h1>
+
+  <div id="loading" class="loading">載入中…</div>
+
+  <!-- 尚未綁定：填寫資料 -->
+  <div id="formView" class="panel hidden">
+    <div class="tabs">
+      <button id="tabNew" class="on" type="button">新會員註冊</button>
+      <button id="tabBind" type="button">我已有會員卡</button>
+    </div>
+
+    <form id="newForm">
+      <label>卡別</label>
+      <select name="type" required>
+        <option value="">請選擇</option>
+        <option value="員工卡">員工卡（集團員工）</option>
+        <option value="扶輪卡">扶輪卡（扶輪社社員）</option>
+      </select>
+      <label>真實姓名</label>
+      <input name="name" required autocomplete="name">
+      <label>手機</label>
+      <input name="phone" type="tel" inputmode="numeric" placeholder="0912345678" required>
+      <div id="codeBox" class="hidden">
+        <label id="codeLabel">員工編號</label>
+        <input name="code" autocapitalize="characters" autocomplete="off">
+        <div id="codeHint" class="hint"></div>
+      </div>
+      <div class="consent">
+        <input type="checkbox" name="consent" id="consent1">
+        <span>我同意沐森集團依個人資料保護法，蒐集上述資料用於會員身分確認、優惠提供及介紹費計算。</span>
+      </div>
+      <button class="btn" type="submit">送出並領取會員卡</button>
+    </form>
+
+    <form id="bindForm" class="hidden">
+      <label>6 碼卡號</label>
+      <input name="cardNo" inputmode="numeric" maxlength="6" placeholder="實體卡上的卡號" required>
+      <label>註冊時留的手機</label>
+      <input name="phone" type="tel" inputmode="numeric" placeholder="0912345678" required>
+      <button class="btn" type="submit">綁定 LINE</button>
+    </form>
+
+    <div id="err" class="err"></div>
+  </div>
+
+  <!-- 已綁定：顯示會員卡 -->
+  <div id="cardView" class="hidden">
+    <div id="card" class="card">
+      <span id="badge" class="badge"></span>
+      <div class="brand">沐森集團 MEMBER</div>
+      <div id="cType" class="ctype"></div>
+      <div id="cName" class="name"></div>
+      <div id="cUnit" class="unit"></div>
+      <div id="cNo" class="no"></div>
+    </div>
+    <div class="barcode"><svg id="bc"></svg></div>
+    <div class="note">結帳時出示此畫面，由櫃台掃描條碼</div>
+  </div>
+</div>
+
+<script>
+  // ====== 部署前要改的兩個值 ======
+  const LIFF_ID = '請填入 LIFF ID';                       // 例如 2001234567-AbCdEfGh
+  const GAS_URL = '請填入 Apps Script 網頁應用程式網址';   // https://script.google.com/macros/s/xxxx/exec
+  // ==================================
+
+  const $ = id => document.getElementById(id);
+  let idToken = '';
+
+  async function api(action, data) {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      // text/plain 可避免瀏覽器對 Apps Script 發 CORS 預檢而失敗
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ source: 'liff', action, idToken, data }),
+    });
+    return res.json();
+  }
+
+  function show(view) {
+    ['loading', 'formView', 'cardView'].forEach(v => $(v).classList.toggle('hidden', v !== view));
+  }
+
+  function showCard(m) {
+    $('card').className = 'card ' + (m.type === '扶輪卡' ? 'rotary' : 'staff');
+    $('cType').textContent = m.type;
+    $('cName').textContent = m.name;
+    $('cUnit').textContent = m.unit || '';
+    $('cNo').textContent = m.cardNo;
+    const pending = m.status !== '啟用';
+    $('badge').textContent = pending ? (m.status || '待審核') : '已啟用';
+    $('badge').className = 'badge' + (pending ? ' pending' : '');
+    JsBarcode('#bc', m.cardNo, { format: 'CODE128', width: 3, height: 70, fontSize: 18, margin: 0 });
+    show('cardView');
+  }
+
+  function setErr(msg) { $('err').textContent = msg || ''; }
+
+  async function submit(form, action) {
+    setErr('');
+    const btn = form.querySelector('button[type=submit]');
+    const fd = new FormData(form);
+    const data = Object.fromEntries(fd.entries());
+    if (action === 'register') data.consent = form.querySelector('[name=consent]').checked;
+    btn.disabled = true;
+    try {
+      const r = await api(action, data);
+      if (r.ok && r.member) showCard(r.member);
+      else setErr(r.error || '送出失敗');
+    } catch (e) {
+      setErr('連線失敗，請稍後再試');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  $('tabNew').onclick = () => { $('tabNew').classList.add('on'); $('tabBind').classList.remove('on');
+    $('newForm').classList.remove('hidden'); $('bindForm').classList.add('hidden'); setErr(''); };
+  $('tabBind').onclick = () => { $('tabBind').classList.add('on'); $('tabNew').classList.remove('on');
+    $('bindForm').classList.remove('hidden'); $('newForm').classList.add('hidden'); setErr(''); };
+  $('newForm').onsubmit = e => { e.preventDefault(); submit(e.target, 'register'); };
+  $('bindForm').onsubmit = e => { e.preventDefault(); submit(e.target, 'bind'); };
+  document.querySelector('#newForm [name=type]').onchange = e => {
+    const t = e.target.value;
+    const codeInput = document.querySelector('#newForm [name=code]');
+    $('codeBox').classList.toggle('hidden', !t);
+    codeInput.required = !!t;
+    if (t === '員工卡') {
+      $('codeLabel').textContent = '員工編號';
+      codeInput.placeholder = '請輸入員工編號';
+      $('codeHint').textContent = '姓名需與人資登記的一致';
+    } else if (t === '扶輪卡') {
+      $('codeLabel').textContent = '扶輪社邀請碼';
+      codeInput.placeholder = '請向所屬扶輪社窗口索取';
+      $('codeHint').textContent = '';
+    }
+  };
+
+  (async () => {
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) { liff.login(); return; }
+      idToken = liff.getIDToken();
+      const r = await api('me');
+      if (!r.ok) { show('formView'); setErr(r.error); return; }
+      if (r.bound) showCard(r.member);
+      else show('formView');
+    } catch (e) {
+      $('loading').textContent = '載入失敗：' + e.message;
+    }
+  })();
+</script>
+</body>
+</html>
