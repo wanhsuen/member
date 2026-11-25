@@ -12,19 +12,24 @@
          background: #f3f4f1; color: #222; }
   .wrap { max-width: 440px; margin: 0 auto; padding: 20px 16px 40px; }
   h1 { font-size: 20px; margin: 4px 0 16px; }
+  h2 { font-size: 17px; margin: 0 0 4px; }
   .hidden { display: none !important; }
   .panel { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-  .tabs { display: flex; gap: 8px; margin-bottom: 14px; }
-  .tabs button { flex: 1; padding: 10px; border: 1px solid #ccd; background: #fff; border-radius: 10px; font-size: 15px; }
-  .tabs button.on { background: #2f5d50; color: #fff; border-color: #2f5d50; }
   label { display: block; font-size: 14px; margin: 12px 0 4px; color: #555; }
-  input, select { width: 100%; padding: 11px; font-size: 16px; border: 1px solid #ccd; border-radius: 8px; background: #fff; }
+  input, select { width: 100%; padding: 11px; font-size: 16px; border: 1px solid #ccd; border-radius: 8px;
+                  background: #fff; color: #222; }
+  .seg { display: flex; gap: 8px; }
+  .seg label { flex: 1; margin: 0; border: 1px solid #ccd; border-radius: 8px; padding: 11px; text-align: center;
+               color: #333; font-size: 15px; }
+  .seg input { display: none; }
+  .seg label.on { background: #2f5d50; color: #fff; border-color: #2f5d50; }
   .consent { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: #555; margin-top: 14px; }
   .consent input { width: auto; margin-top: 3px; }
   .btn { width: 100%; margin-top: 18px; padding: 13px; font-size: 16px; border: 0; border-radius: 10px;
          background: #06c755; color: #fff; font-weight: 600; }
   .btn:disabled { opacity: .5; }
   .err { color: #c0392b; font-size: 14px; margin-top: 10px; min-height: 1em; }
+  .ok  { color: #1e8449; font-size: 14px; margin-top: 10px; min-height: 1em; }
   .hint { font-size: 13px; color: #777; margin-top: 6px; }
 
   .card { border-radius: 16px; padding: 22px 20px 18px; color: #fff; position: relative;
@@ -36,12 +41,21 @@
   .card .name  { margin-top: auto; font-size: 18px; }
   .card .unit  { font-size: 13px; opacity: .8; }
   .card .no    { font-size: 30px; font-weight: 700; letter-spacing: 6px; font-variant-numeric: tabular-nums; margin-top: 6px; }
+  /* 員工卡：玫瑰金卡面圖片，卡號疊在原 EA1001 位置 */
+  .card.staff { background: url('card-staff.png') center / 100% 100% no-repeat; padding: 0;
+                aspect-ratio: 445 / 291; container-type: inline-size; box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+  .card.staff > :not(.staffNo):not(.badge) { display: none; }
+  .staffNo { display: none; }
+  .card.staff .staffNo { display: block; position: absolute; left: 5.4%; top: 57.6%;
+                         font-size: 5.1cqw; line-height: 1; color: #8e6c65; letter-spacing: .02em;
+                         font-family: "Helvetica Neue", Arial, sans-serif; font-weight: 400; }
+  .holder { text-align: center; font-size: 15px; color: #444; margin-top: 12px; }
   .badge { position: absolute; top: 18px; right: 18px; font-size: 12px; padding: 3px 10px; border-radius: 20px;
            background: rgba(255,255,255,.2); }
-  .badge.pending { background: #f5b301; color: #222; }
+  .badge.off { background: #f5b301; color: #222; }
   .barcode { background: #fff; border-radius: 12px; margin-top: 16px; padding: 14px; text-align: center; }
   .barcode svg { width: 100%; height: auto; }
-  .note { font-size: 13px; color: #666; text-align: center; margin-top: 10px; }
+  .note { font-size: 13px; color: #666; text-align: center; margin: 10px 0 20px; }
   .loading { text-align: center; padding: 60px 0; color: #777; }
 </style>
 </head>
@@ -51,48 +65,64 @@
 
   <div id="loading" class="loading">載入中…</div>
 
-  <!-- 尚未綁定：填寫資料 -->
+  <!-- ===== 第一次：註冊 ===== -->
   <div id="formView" class="panel hidden">
-    <div class="tabs">
-      <button id="tabNew" class="on" type="button">新會員註冊</button>
-      <button id="tabBind" type="button">我已有會員卡</button>
-    </div>
-
-    <form id="newForm">
-      <label>卡別</label>
-      <select name="type" required>
-        <option value="">請選擇</option>
-        <option value="員工卡">員工卡（集團員工）</option>
-        <option value="扶輪卡">扶輪卡（扶輪社社員）</option>
-      </select>
+    <h2>會員註冊</h2>
+    <div class="hint">請填寫真實資料，完成後即可領取會員卡</div>
+    <form id="regForm" novalidate>
       <label>真實姓名</label>
-      <input name="name" required autocomplete="name">
+      <input name="name" autocomplete="name">
       <label>手機</label>
-      <input name="phone" type="tel" inputmode="numeric" placeholder="0912345678" required>
-      <div id="codeBox" class="hidden">
-        <label id="codeLabel">員工編號</label>
-        <input name="code" autocapitalize="characters" autocomplete="off">
-        <div id="codeHint" class="hint"></div>
+      <input name="phone" type="tel" inputmode="numeric" placeholder="0912345678">
+      <label>性別</label>
+      <div class="seg" data-name="gender">
+        <label><input type="radio" name="gender" value="男">男</label>
+        <label><input type="radio" name="gender" value="女">女</label>
+        <label><input type="radio" name="gender" value="不透露">不透露</label>
       </div>
+      <label>出生年月日</label>
+      <input name="birthday" type="date" min="1900-01-01">
+      <label>Email</label>
+      <input name="email" type="email" inputmode="email" autocomplete="email">
+
+      <label>卡別</label>
+      <div class="seg" data-name="type">
+        <label><input type="radio" name="type" value="員工卡">員工卡</label>
+        <label><input type="radio" name="type" value="扶輪卡">扶輪卡</label>
+      </div>
+
+      <div id="staffBox" class="hidden">
+        <label>員工卡卡號</label>
+        <input name="cardNo" autocapitalize="characters" autocomplete="off" placeholder="請輸入實體卡上的卡號">
+        <label>任職公司</label>
+        <select name="company">
+          <option value="">請選擇</option>
+          <option>寵之寶</option>
+          <option>九大文具</option>
+          <option>禾和國際法律事務所</option>
+          <option>上禾醫務</option>
+          <option>上圓預防醫學診所</option>
+          <option>流浪動物之家基金會</option>
+          <option>萬通租車</option>
+          <option>禾森娛樂</option>
+        </select>
+      </div>
+      <div id="rotaryBox" class="hidden">
+        <label>扶輪社名稱</label>
+        <input name="club" placeholder="例如：台北東區扶輪社">
+        <div class="hint">扶輪卡卡號將於註冊完成後自動產生</div>
+      </div>
+
       <div class="consent">
-        <input type="checkbox" name="consent" id="consent1">
-        <span>我同意沐森集團依個人資料保護法，蒐集上述資料用於會員身分確認、優惠提供及介紹費計算。</span>
+        <input type="checkbox" name="consent" id="consent">
+        <span>我同意沐森集團依個人資料保護法，蒐集上述資料用於會員身分確認、優惠提供及介紹費計算與發放。</span>
       </div>
-      <button class="btn" type="submit">送出並領取會員卡</button>
+      <button class="btn" type="submit">完成註冊</button>
+      <div id="regErr" class="err"></div>
     </form>
-
-    <form id="bindForm" class="hidden">
-      <label>6 碼卡號</label>
-      <input name="cardNo" inputmode="numeric" maxlength="6" placeholder="實體卡上的卡號" required>
-      <label>註冊時留的手機</label>
-      <input name="phone" type="tel" inputmode="numeric" placeholder="0912345678" required>
-      <button class="btn" type="submit">綁定 LINE</button>
-    </form>
-
-    <div id="err" class="err"></div>
   </div>
 
-  <!-- 已綁定：顯示會員卡 -->
+  <!-- ===== 已註冊：會員卡＋補充資料 ===== -->
   <div id="cardView" class="hidden">
     <div id="card" class="card">
       <span id="badge" class="badge"></span>
@@ -101,17 +131,38 @@
       <div id="cName" class="name"></div>
       <div id="cUnit" class="unit"></div>
       <div id="cNo" class="no"></div>
+      <div id="sNo" class="staffNo"></div>
     </div>
+    <div id="holder" class="holder"></div>
     <div class="barcode"><svg id="bc"></svg></div>
     <div class="note">結帳時出示此畫面，由櫃台掃描條碼</div>
+
+    <div class="panel">
+      <h2>補充資料</h2>
+      <div class="hint">介紹費匯款使用，可隨時修改</div>
+      <form id="extraForm">
+        <label>通訊地址</label>
+        <input name="address" autocomplete="street-address">
+        <label>匯款銀行名稱</label>
+        <input name="bank" placeholder="例如：台灣銀行（004）">
+        <label>分行</label>
+        <input name="branch" placeholder="例如：信義分行">
+        <label>匯款帳號</label>
+        <input name="account" inputmode="numeric">
+        <label>戶名</label>
+        <input name="holder">
+        <button class="btn" type="submit">儲存</button>
+        <div id="extraMsg" class="ok"></div>
+      </form>
+    </div>
   </div>
 </div>
 
 <script>
-  // ====== 部署前要改的兩個值 ======
-  const LIFF_ID = '請填入 LIFF ID';                       // 例如 2001234567-AbCdEfGh
+  // ====== 部署前要改的值 ======
+  const LIFF_ID = '2012800973-voOwiMMB';
   const GAS_URL = '請填入 Apps Script 網頁應用程式網址';   // https://script.google.com/macros/s/xxxx/exec
-  // ==================================
+  // ============================
 
   const $ = id => document.getElementById(id);
   let idToken = '';
@@ -119,8 +170,7 @@
   async function api(action, data) {
     const res = await fetch(GAS_URL, {
       method: 'POST',
-      // text/plain 可避免瀏覽器對 Apps Script 發 CORS 預檢而失敗
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // 避免 CORS 預檢
       body: JSON.stringify({ source: 'liff', action, idToken, data }),
     });
     return res.json();
@@ -136,53 +186,60 @@
     $('cName').textContent = m.name;
     $('cUnit').textContent = m.unit || '';
     $('cNo').textContent = m.cardNo;
-    const pending = m.status !== '啟用';
-    $('badge').textContent = pending ? (m.status || '待審核') : '已啟用';
-    $('badge').className = 'badge' + (pending ? ' pending' : '');
+    $('sNo').textContent = m.cardNo;
+    $('holder').textContent = m.name + (m.unit ? '．' + m.unit : '');
+    $('holder').classList.toggle('hidden', m.type !== '員工卡');
+    const active = m.status === '啟用';
+    $('badge').textContent = active ? '已啟用' : (m.status || '未啟用');
+    $('badge').className = 'badge' + (active ? '' : ' off');
+    // 員工卡卡面上不放「已啟用」標籤，只在非啟用狀態時提示
+    $('badge').classList.toggle('hidden', m.type === '員工卡' && active);
     JsBarcode('#bc', m.cardNo, { format: 'CODE128', width: 3, height: 70, fontSize: 18, margin: 0 });
+    const f = $('extraForm');
+    ['address', 'bank', 'branch', 'account', 'holder'].forEach(k => { f.elements[k].value = m[k] || ''; });
     show('cardView');
   }
 
-  function setErr(msg) { $('err').textContent = msg || ''; }
+  // 性別／卡別按鈕樣式
+  document.querySelectorAll('.seg').forEach(seg => {
+    seg.addEventListener('change', () => {
+      seg.querySelectorAll('label').forEach(l => l.classList.toggle('on', l.querySelector('input').checked));
+      if (seg.dataset.name === 'type') {
+        const t = seg.querySelector('input:checked').value;
+        $('staffBox').classList.toggle('hidden', t !== '員工卡');
+        $('rotaryBox').classList.toggle('hidden', t !== '扶輪卡');
+      }
+    });
+  });
 
-  async function submit(form, action) {
-    setErr('');
-    const btn = form.querySelector('button[type=submit]');
-    const fd = new FormData(form);
-    const data = Object.fromEntries(fd.entries());
-    if (action === 'register') data.consent = form.querySelector('[name=consent]').checked;
+  $('regForm').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector('button');
+    const data = Object.fromEntries(new FormData(f).entries());
+    data.consent = f.elements.consent.checked;
+    $('regErr').textContent = '';
     btn.disabled = true;
     try {
-      const r = await api(action, data);
+      const r = await api('register', data);
       if (r.ok && r.member) showCard(r.member);
-      else setErr(r.error || '送出失敗');
-    } catch (e) {
-      setErr('連線失敗，請稍後再試');
-    } finally {
-      btn.disabled = false;
-    }
-  }
+      else $('regErr').textContent = r.error || '送出失敗';
+    } catch (err) {
+      $('regErr').textContent = '連線失敗，請稍後再試';
+    } finally { btn.disabled = false; }
+  };
 
-  $('tabNew').onclick = () => { $('tabNew').classList.add('on'); $('tabBind').classList.remove('on');
-    $('newForm').classList.remove('hidden'); $('bindForm').classList.add('hidden'); setErr(''); };
-  $('tabBind').onclick = () => { $('tabBind').classList.add('on'); $('tabNew').classList.remove('on');
-    $('bindForm').classList.remove('hidden'); $('newForm').classList.add('hidden'); setErr(''); };
-  $('newForm').onsubmit = e => { e.preventDefault(); submit(e.target, 'register'); };
-  $('bindForm').onsubmit = e => { e.preventDefault(); submit(e.target, 'bind'); };
-  document.querySelector('#newForm [name=type]').onchange = e => {
-    const t = e.target.value;
-    const codeInput = document.querySelector('#newForm [name=code]');
-    $('codeBox').classList.toggle('hidden', !t);
-    codeInput.required = !!t;
-    if (t === '員工卡') {
-      $('codeLabel').textContent = '員工編號';
-      codeInput.placeholder = '請輸入員工編號';
-      $('codeHint').textContent = '姓名需與人資登記的一致';
-    } else if (t === '扶輪卡') {
-      $('codeLabel').textContent = '扶輪社邀請碼';
-      codeInput.placeholder = '請向所屬扶輪社窗口索取';
-      $('codeHint').textContent = '';
-    }
+  $('extraForm').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector('button'), msg = $('extraMsg');
+    msg.textContent = ''; msg.className = 'ok';
+    btn.disabled = true;
+    try {
+      const r = await api('update', Object.fromEntries(new FormData(f).entries()));
+      if (r.ok) { msg.textContent = '已儲存'; showCard(r.member); }
+      else { msg.className = 'err'; msg.textContent = r.error || '儲存失敗'; }
+    } catch (err) {
+      msg.className = 'err'; msg.textContent = '連線失敗，請稍後再試';
+    } finally { btn.disabled = false; }
   };
 
   (async () => {
@@ -191,11 +248,10 @@
       if (!liff.isLoggedIn()) { liff.login(); return; }
       idToken = liff.getIDToken();
       const r = await api('me');
-      if (!r.ok) { show('formView'); setErr(r.error); return; }
-      if (r.bound) showCard(r.member);
-      else show('formView');
-    } catch (e) {
-      $('loading').textContent = '載入失敗：' + e.message;
+      if (!r.ok) { show('formView'); $('regErr').textContent = r.error; return; }
+      if (r.bound) showCard(r.member); else show('formView');
+    } catch (err) {
+      $('loading').textContent = '載入失敗：' + err.message;
     }
   })();
 </script>
