@@ -28,6 +28,8 @@
   .btn { width: 100%; margin-top: 18px; padding: 13px; font-size: 16px; border: 0; border-radius: 10px;
          background: #06c755; color: #fff; font-weight: 600; }
   .btn:disabled { opacity: .5; }
+  .btn2 { background:#fff; color:#6e4b45; border:1px solid #d9c3bd; margin-top:4px; }
+  .notice { background:#fdf3e6; color:#8a5a1c; border-radius:8px; padding:10px 12px; font-size:14px; margin-top:10px; }
   .err { color: #c0392b; font-size: 14px; margin-top: 10px; min-height: 1em; }
   .ok  { color: #1e8449; font-size: 14px; margin-top: 10px; min-height: 1em; }
   .hint { font-size: 13px; color: #777; margin-top: 6px; }
@@ -76,6 +78,7 @@
   <div id="formView" class="panel hidden">
     <h2>會員註冊</h2>
     <div class="hint">請填寫真實資料，完成後即可領取會員卡</div>
+    <div id="stoppedNote" class="notice hidden"></div>
     <form id="regForm" novalidate>
       <label>真實姓名</label>
       <input name="name" autocomplete="name">
@@ -102,17 +105,7 @@
         <label>員工卡卡號</label>
         <input name="cardNo" autocapitalize="characters" autocomplete="off" placeholder="請輸入實體卡上的卡號">
         <label>任職公司</label>
-        <select name="company">
-          <option value="">請選擇</option>
-          <option>寵之寶</option>
-          <option>九大文具</option>
-          <option>禾和國際法律事務所</option>
-          <option>上禾醫務</option>
-          <option>上圓預防醫學診所</option>
-          <option>流浪動物之家基金會</option>
-          <option>萬通租車</option>
-          <option>禾森娛樂</option>
-        </select>
+        <select name="company" class="companySel"></select>
       </div>
       <div id="rotaryBox" class="hidden">
         <label>扶輪社名稱</label>
@@ -144,6 +137,38 @@
     <div class="barcode"><svg id="bc"></svg></div>
     <div class="note">結帳時出示此畫面，由櫃台掃描條碼</div>
 
+    <button id="editBtn" class="btn btn2" type="button">修改基本資料</button>
+    <div id="profilePanel" class="panel hidden" style="margin-top:14px">
+      <h2>修改基本資料</h2>
+      <div class="hint">卡號與卡別無法修改，如需更換請洽管理者</div>
+      <form id="profileForm" novalidate>
+        <label>真實姓名</label>
+        <input name="name" autocomplete="name">
+        <label>手機</label>
+        <input name="phone" type="tel" inputmode="numeric" placeholder="0912345678">
+        <label>性別</label>
+        <select name="gender">
+          <option value="男">男</option><option value="女">女</option><option value="不透露">不透露</option>
+        </select>
+        <label>出生年月日</label>
+        <input name="birthday" type="date" min="1900-01-01">
+        <label>Email</label>
+        <input name="email" type="email" inputmode="email">
+        <div id="pStaff">
+          <label>任職公司</label>
+          <select name="company" class="companySel"></select>
+        </div>
+        <div id="pRotary">
+          <label>扶輪社名稱</label>
+          <input name="club">
+        </div>
+        <button class="btn" type="submit">儲存基本資料</button>
+        <button id="cancelEdit" class="btn btn2" type="button">取消</button>
+        <div id="profileMsg" class="err"></div>
+      </form>
+    </div>
+    <div style="height:16px"></div>
+
     <div class="panel">
       <h2>補充資料</h2>
       <div class="hint">介紹費匯款使用，可隨時修改</div>
@@ -173,6 +198,16 @@
 
   const $ = id => document.getElementById(id);
   let idToken = '';
+  let me = null;
+
+  // 員工卡任職公司（要和 LineMember.gs 的 COMPANIES 一致）
+  const COMPANIES = ['寵之寶動物醫院', '禾和國際法律事務所', '久大文具連鎖', '上禾醫務管理顧問有限公司',
+                     '上圓預防醫學健康管理診所', '財團法人流浪動物之家基金會', '萬通國際租賃股份有限公司',
+                     '酒大居酒屋'];
+  document.querySelectorAll('.companySel').forEach(sel => {
+    sel.innerHTML = '<option value="">請選擇</option>' +
+      COMPANIES.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+  });
 
   async function api(action, data) {
     const res = await fetch(GAS_URL, {
@@ -188,6 +223,9 @@
   }
 
   function showCard(m) {
+    me = m;
+    $('profilePanel').classList.add('hidden');
+    $('editBtn').classList.remove('hidden');
     $('card').className = 'card ' + (m.type === '扶輪卡' ? 'rotary' : 'staff');
     $('cType').textContent = m.type;
     $('cName').textContent = m.name;
@@ -248,6 +286,37 @@
     } finally { btn.disabled = false; }
   };
 
+  $('editBtn').onclick = () => {
+    const f = $('profileForm');
+    ['name', 'phone', 'gender', 'birthday', 'email'].forEach(k => { f.elements[k].value = me[k] || ''; });
+    const staff = me.type === '員工卡';
+    $('pStaff').classList.toggle('hidden', !staff);
+    $('pRotary').classList.toggle('hidden', staff);
+    f.elements.company.value = staff ? (me.unit || '') : '';
+    f.elements.club.value = staff ? '' : (me.unit || '');
+    $('profileMsg').textContent = '';
+    $('profilePanel').classList.remove('hidden');
+    $('editBtn').classList.add('hidden');
+    $('profilePanel').scrollIntoView({ behavior: 'smooth' });
+  };
+  $('cancelEdit').onclick = () => {
+    $('profilePanel').classList.add('hidden');
+    $('editBtn').classList.remove('hidden');
+  };
+  $('profileForm').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector('button[type=submit]');
+    $('profileMsg').textContent = '';
+    btn.disabled = true;
+    try {
+      const r = await api('profile', Object.fromEntries(new FormData(f).entries()));
+      if (r.ok) { showCard(r.member); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      else $('profileMsg').textContent = r.error || '儲存失敗';
+    } catch (err) {
+      $('profileMsg').textContent = '連線失敗，請稍後再試';
+    } finally { btn.disabled = false; }
+  };
+
   (async () => {
     try {
       await liff.init({ liffId: LIFF_ID });
@@ -255,7 +324,13 @@
       idToken = liff.getIDToken();
       const r = await api('me');
       if (!r.ok) { show('formView'); $('regErr').textContent = r.error; return; }
-      if (r.bound) showCard(r.member); else show('formView');
+      if (r.bound) { showCard(r.member); return; }
+      if (r.stopped && r.stopped.length) {
+        const s = r.stopped[r.stopped.length - 1];
+        $('stoppedNote').textContent = '您原本的' + s.type + '（' + s.cardNo + '）已停用，可以重新註冊新的會員卡。';
+        $('stoppedNote').classList.remove('hidden');
+      }
+      show('formView');
     } catch (err) {
       $('loading').textContent = '載入失敗：' + err.message;
     }
