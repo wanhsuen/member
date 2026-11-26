@@ -66,6 +66,55 @@
   .barcode svg { width: 100%; height: auto; }
   .note { font-size: 13px; color: #666; text-align: center; margin: 10px 0 20px; }
   .loading { text-align: center; padding: 60px 0; color: #777; }
+
+  /* ===== 未綁定：可愛的加入會員頁 ===== */
+  body.joinMode { background: linear-gradient(170deg,#fff1f4 0%,#fff8f1 55%,#fdf0dc 100%); min-height: 100vh; }
+  body.joinMode h1 { display: none; }
+  .join { position: relative; text-align: center; color: #5b3a42; padding-top: 14px; }
+  .join .deco { position: absolute; opacity: .55; animation: jfloat 6s ease-in-out infinite; }
+  .join .p1 { top: 0; left: 2px; width: 28px; }
+  .join .p2 { top: 130px; right: 0; width: 22px; animation-delay: 1.2s; }
+  .join .p3 { top: 340px; left: -4px; width: 20px; animation-delay: 2.4s; }
+  .join .s1 { top: 46px; right: 30px; width: 18px; animation-delay: .6s; }
+  .join .s2 { top: 280px; right: 14px; width: 14px; animation-delay: 1.8s; }
+  @keyframes jfloat { 0%,100% { transform: translateY(0) rotate(0) } 50% { transform: translateY(-10px) rotate(8deg) } }
+  .join .gift { width: 150px; height: 150px; margin: 6px auto 4px; display: block; animation: jbounce 2.4s ease-in-out infinite; }
+  @keyframes jbounce { 0%,100% { transform: translateY(0) } 45% { transform: translateY(-12px) } 60% { transform: translateY(0) scale(1.04,.96) } }
+  .join .jbrand { font-size: 13px; letter-spacing: 3px; color: #d9a85b; font-weight: 600; margin-bottom: 10px; }
+  .join .jt { font-size: 30px; line-height: 1.35; font-weight: 800; letter-spacing: 1px; margin: 0; }
+  .join .hl { color: #e8899c; position: relative; display: inline-block; }
+  .join .hl::after { content: ""; position: absolute; left: -2px; right: -2px; bottom: 4px; height: 10px;
+                     background: #ffd9e0; z-index: -1; border-radius: 6px; }
+  .join .sub { margin-top: 10px; font-size: 15px; color: #9a7b82; line-height: 1.7; }
+  .join .perks { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 26px 0 28px; }
+  .join .perk { background: #fff; border-radius: 20px; padding: 16px 10px 14px; box-shadow: 0 6px 18px rgba(232,137,156,.16);
+                animation: jpop .5s ease-out both; }
+  .join .perk:nth-child(2) { animation-delay: .1s } .join .perk:nth-child(3) { animation-delay: .2s }
+  .join .perk:nth-child(4) { animation-delay: .3s }
+  @keyframes jpop { from { opacity: 0; transform: scale(.8) translateY(10px) } to { opacity: 1; transform: none } }
+  .join .ico { width: 46px; height: 46px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; }
+  .join .ico svg { width: 26px; height: 26px; }
+  .join .perk b { display: block; font-size: 15px; }
+  .join .perk span { display: block; font-size: 12px; color: #9a7b82; margin-top: 3px; }
+  .join .c1 { background: #ffe6ea } .join .c2 { background: #e7f5e9 } .join .c3 { background: #f3e8ff } .join .c4 { background: #e3f1fb }
+  .join .jbtn { display: block; width: 100%; border: 0; padding: 17px 0; border-radius: 999px; font-size: 18px; font-weight: 700;
+                letter-spacing: 2px; color: #fff; background: linear-gradient(90deg,#f19aac,#e8799a);
+                box-shadow: 0 8px 20px rgba(232,121,154,.4); animation: jpulse 2s ease-in-out infinite; }
+  .join .jbtn:active { transform: scale(.97); }
+  @keyframes jpulse { 0%,100% { box-shadow: 0 8px 20px rgba(232,121,154,.4) } 50% { box-shadow: 0 8px 28px rgba(232,121,154,.7) } }
+  .join .jhint { margin-top: 12px; font-size: 13px; color: #9a7b82; }
+  .join .jhint em { font-style: normal; color: #e8899c; font-weight: 700; }
+
+  /* ===== 我的優惠 ===== */
+  .offerHead { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+  .offerHead h2 { font-size: 19px; margin: 0; }
+  .offerHead .upd { font-size: 12px; color: #888; }
+  .ogroup { background: #fff; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .ogroup h3 { font-size: 16px; margin: 0 0 8px; color: #6e4b45; }
+  .ogroup ul { margin: 0; padding-left: 20px; }
+  .ogroup li { font-size: 14px; line-height: 1.65; color: #333; margin-bottom: 6px; }
+  .onotes { font-size: 13px; color: #777; line-height: 1.6; margin: 6px 4px 0; padding-left: 18px; }
+  .refBtn { display: block; text-align: center; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -73,6 +122,49 @@
   <h1>沐森集團 會員中心</h1>
 
   <div id="loading" class="loading">載入中…</div>
+
+  <!-- ===== 未綁定：可愛的加入會員頁 ===== -->
+  <div id="joinView" class="join hidden">
+    <svg class="deco p1" viewBox="0 0 24 24" fill="#f4a3b4"><circle cx="6" cy="9" r="2.4"/><circle cx="10" cy="5" r="2.4"/><circle cx="14" cy="5" r="2.4"/><circle cx="18" cy="9" r="2.4"/><ellipse cx="12" cy="15.5" rx="5" ry="4.2"/></svg>
+    <svg class="deco p2" viewBox="0 0 24 24" fill="#e7c48a"><circle cx="6" cy="9" r="2.4"/><circle cx="10" cy="5" r="2.4"/><circle cx="14" cy="5" r="2.4"/><circle cx="18" cy="9" r="2.4"/><ellipse cx="12" cy="15.5" rx="5" ry="4.2"/></svg>
+    <svg class="deco p3" viewBox="0 0 24 24" fill="#f4a3b4"><circle cx="6" cy="9" r="2.4"/><circle cx="10" cy="5" r="2.4"/><circle cx="14" cy="5" r="2.4"/><circle cx="18" cy="9" r="2.4"/><ellipse cx="12" cy="15.5" rx="5" ry="4.2"/></svg>
+    <svg class="deco s1" viewBox="0 0 24 24" fill="#e7c48a"><path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z"/></svg>
+    <svg class="deco s2" viewBox="0 0 24 24" fill="#f4a3b4"><path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z"/></svg>
+
+    <div class="jbrand">沐森集團 會員中心</div>
+    <svg class="gift" viewBox="0 0 160 160">
+      <ellipse cx="80" cy="148" rx="46" ry="6" fill="#f3d6dc"/>
+      <rect x="30" y="70" width="100" height="72" rx="12" fill="#ffc6d1"/>
+      <rect x="22" y="54" width="116" height="26" rx="10" fill="#f7a8b8"/>
+      <rect x="72" y="54" width="16" height="88" fill="#f5d08a"/>
+      <path d="M80 54 C60 26 36 36 48 50 C54 57 70 56 80 54Z" fill="#f5d08a"/>
+      <path d="M80 54 C100 26 124 36 112 50 C106 57 90 56 80 54Z" fill="#f5d08a"/>
+      <circle cx="80" cy="54" r="7" fill="#e9b766"/>
+      <circle cx="60" cy="104" r="4.5" fill="#5b3a42"/><circle cx="100" cy="104" r="4.5" fill="#5b3a42"/>
+      <circle cx="61.5" cy="102.5" r="1.4" fill="#fff"/><circle cx="101.5" cy="102.5" r="1.4" fill="#fff"/>
+      <path d="M73 112 Q80 119 87 112" stroke="#5b3a42" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <ellipse cx="50" cy="114" rx="7" ry="4" fill="#ff9fb3" opacity=".7"/><ellipse cx="110" cy="114" rx="7" ry="4" fill="#ff9fb3" opacity=".7"/>
+    </svg>
+    <h2 class="jt">好多優惠<br><span class="hl">趕快加入會員喔！</span></h2>
+    <p class="sub">加入會員、綁定你的認同卡<br>集團合作夥伴的專屬禮遇通通等你來拿</p>
+    <div class="perks">
+      <div class="perk"><div class="ico c1"><svg viewBox="0 0 24 24" fill="#e8899c"><circle cx="6" cy="9" r="2.4"/><circle cx="10" cy="5" r="2.4"/><circle cx="14" cy="5" r="2.4"/><circle cx="18" cy="9" r="2.4"/><ellipse cx="12" cy="15.5" rx="5" ry="4.2"/></svg></div><b>寵物醫療</b><span>門診・健檢</span></div>
+      <div class="perk"><div class="ico c2"><svg viewBox="0 0 24 24" fill="#6cb27a"><path d="M12 2C7 7 5 10.5 5 14a7 7 0 0014 0c0-3.5-2-7-7-12z"/></svg></div><b>保養養髮</b><span>保養品・生髮水</span></div>
+      <div class="perk"><div class="ico c3"><svg viewBox="0 0 24 24" fill="#a77bd6"><path d="M12 1l2.8 7.6L22 11l-7.2 2.4L12 21l-2.8-7.6L2 11l7.2-2.4z"/></svg></div><b>醫美服務</b><span>專屬折扣</span></div>
+      <div class="perk"><div class="ico c4"><svg viewBox="0 0 24 24" fill="#5a9fd4"><path d="M5 11l1.6-4.4A2 2 0 018.5 5h7a2 2 0 011.9 1.6L19 11h.5A1.5 1.5 0 0121 12.5V17h-2v1.5a1.5 1.5 0 01-3 0V17H8v1.5a1.5 1.5 0 01-3 0V17H3v-4.5A1.5 1.5 0 014.5 11zM7.2 11h9.6l-1.2-3.4a.8.8 0 00-.7-.6H9.1a.8.8 0 00-.7.6z"/></svg></div><b>機場接送</b><span>包車旅遊</span></div>
+    </div>
+    <button id="joinBtn" class="jbtn" type="button">立即加入會員 ♡</button>
+    <p class="jhint">填寫資料只要 <em>1 分鐘</em>，介紹朋友還有現金回饋喔</p>
+  </div>
+
+  <!-- ===== 已綁定：我的優惠（只顯示自己卡別） ===== -->
+  <div id="offersView" class="hidden">
+    <div class="offerHead"><h2 id="offerTitle">我的優惠</h2><span id="offerUpd" class="upd"></span></div>
+    <div id="offerList"></div>
+    <a id="refBtn" class="btn refBtn hidden" target="_blank" rel="noopener">介紹客人？登記感謝金</a>
+    <ul id="offerNotes" class="onotes"></ul>
+    <button id="backCard" class="btn btn2" type="button" style="margin-top:16px">回到我的會員卡</button>
+  </div>
 
   <!-- ===== 第一次：註冊 ===== -->
   <div id="formView" class="panel hidden">
@@ -137,6 +229,7 @@
     <div class="barcode"><svg id="bc"></svg></div>
     <div class="note">結帳時出示此畫面，由櫃台掃描條碼</div>
 
+    <button id="offersBtn" class="btn" type="button" style="margin-top:0;margin-bottom:10px">查看我的優惠</button>
     <button id="editBtn" class="btn btn2" type="button">修改基本資料</button>
     <div id="profilePanel" class="panel hidden" style="margin-top:14px">
       <h2>修改基本資料</h2>
@@ -219,8 +312,42 @@
   }
 
   function show(view) {
-    ['loading', 'formView', 'cardView'].forEach(v => $(v).classList.toggle('hidden', v !== view));
+    ['loading', 'joinView', 'formView', 'cardView', 'offersView'].forEach(v => $(v).classList.toggle('hidden', v !== view));
+    document.body.classList.toggle('joinMode', view === 'joinView');
+    window.scrollTo(0, 0);
   }
+
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g,
+    c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // 我的優惠：後端只會回傳自己卡別的優惠；未綁定則顯示加入會員頁
+  async function loadOffers() {
+    $('loading').textContent = '載入優惠中…';
+    show('loading');
+    try {
+      const r = await api('offers');
+      if (!r.ok) { $('loading').textContent = r.error || '載入失敗'; return; }
+      if (!r.bound) { show('joinView'); return; }
+      const o = r.offers || { groups: [], updated: '' };
+      $('offerTitle').textContent = r.cardType + '專屬優惠';
+      $('offerUpd').textContent = o.updated ? '更新：' + o.updated : '';
+      $('offerList').innerHTML = o.groups.length
+        ? o.groups.map(g => '<div class="ogroup"><h3>' + esc(g.company) + '</h3><ul>' +
+            g.items.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul></div>').join('')
+        : '<div class="ogroup">目前沒有優惠資訊</div>';
+      $('refBtn').classList.toggle('hidden', !r.referralUrl);
+      if (r.referralUrl) $('refBtn').href = r.referralUrl;
+      $('offerNotes').innerHTML = (r.notes || []).map(n => '<li>' + esc(n) + '</li>').join('');
+      $('backCard').classList.toggle('hidden', !me);
+      show('offersView');
+    } catch (err) {
+      $('loading').textContent = '連線失敗，請稍後再試';
+    }
+  }
+
+  $('offersBtn').onclick = loadOffers;
+  $('backCard').onclick = () => { if (me) showCard(me); };
+  $('joinBtn').onclick = () => show('formView');
 
   function showCard(m) {
     me = m;
@@ -324,13 +451,20 @@
       idToken = liff.getIDToken();
       const r = await api('me');
       if (!r.ok) { show('formView'); $('regErr').textContent = r.error; return; }
-      if (r.bound) { showCard(r.member); return; }
+      // 從圖文選單「優惠」進來：https://liff.line.me/LIFF_ID?page=offers
+      const wantOffers = new URLSearchParams(location.search).get('page') === 'offers';
+      if (r.bound) {
+        showCard(r.member);
+        if (wantOffers) loadOffers();
+        return;
+      }
       if (r.stopped && r.stopped.length) {
         const s = r.stopped[r.stopped.length - 1];
         $('stoppedNote').textContent = '您原本的' + s.type + '（' + s.cardNo + '）已停用，可以重新註冊新的會員卡。';
         $('stoppedNote').classList.remove('hidden');
       }
-      show('formView');
+      // 還沒綁定：從「會員專屬禮遇」進來 → 可愛的加入會員頁；從「我的會員卡」進來 → 直接註冊表單
+      show(wantOffers ? 'joinView' : 'formView');
     } catch (err) {
       $('loading').textContent = '載入失敗：' + err.message;
     }
