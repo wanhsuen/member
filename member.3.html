@@ -44,11 +44,18 @@
   /* 員工卡：玫瑰金卡面圖片，卡號疊在原 EA1001 位置 */
   .card.staff { background: url('card-staff.png') center / 100% 100% no-repeat; padding: 0;
                 aspect-ratio: 445 / 291; container-type: inline-size; box-shadow: 0 6px 18px rgba(0,0,0,.15); }
-  .card.staff > :not(.staffNo):not(.badge) { display: none; }
+  /* 扶輪卡：金色卡面圖片，卡號放在 VIP Membership Card 下方 */
+  .card.rotary { background: url('card-rotary.jpg') center / 100% 100% no-repeat; padding: 0;
+                 aspect-ratio: 1404 / 904; container-type: inline-size; border-radius: 3.6cqw;
+                 box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+  .card.staff > :not(.staffNo):not(.badge),
+  .card.rotary > :not(.staffNo):not(.badge) { display: none; }
   .staffNo { display: none; }
-  .card.staff .staffNo { display: block; position: absolute; left: 5.4%; top: 57.6%;
+  .card.staff .staffNo, .card.rotary .staffNo {
+                         display: block; position: absolute; left: 5.4%; top: 57.6%;
                          font-size: 5.1cqw; line-height: 1; color: #8e6c65; letter-spacing: .02em;
                          font-family: "Helvetica Neue", Arial, sans-serif; font-weight: 400; }
+  .card.rotary .staffNo { left: 5.6%; top: 60%; color: #8a7048; }
   .holder { text-align: center; font-size: 15px; color: #444; margin-top: 12px; }
   .badge { position: absolute; top: 18px; right: 18px; font-size: 12px; padding: 3px 10px; border-radius: 20px;
            background: rgba(255,255,255,.2); }
@@ -188,12 +195,11 @@
     $('cNo').textContent = m.cardNo;
     $('sNo').textContent = m.cardNo;
     $('holder').textContent = m.name + (m.unit ? '．' + m.unit : '');
-    $('holder').classList.toggle('hidden', m.type !== '員工卡');
     const active = m.status === '啟用';
     $('badge').textContent = active ? '已啟用' : (m.status || '未啟用');
     $('badge').className = 'badge' + (active ? '' : ' off');
     // 員工卡卡面上不放「已啟用」標籤，只在非啟用狀態時提示
-    $('badge').classList.toggle('hidden', m.type === '員工卡' && active);
+    $('badge').classList.toggle('hidden', active);
     JsBarcode('#bc', m.cardNo, { format: 'CODE128', width: 3, height: 70, fontSize: 18, margin: 0 });
     const f = $('extraForm');
     ['address', 'bank', 'branch', 'account', 'holder'].forEach(k => { f.elements[k].value = m[k] || ''; });
