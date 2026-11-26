@@ -115,6 +115,48 @@
   .ogroup li { font-size: 14px; line-height: 1.65; color: #333; margin-bottom: 6px; }
   .onotes { font-size: 13px; color: #777; line-height: 1.6; margin: 6px 4px 0; padding-left: 18px; }
   .refBtn { display: block; text-align: center; text-decoration: none; }
+
+  /* ===== 關係企業品牌服務（左右滑動卡片） ===== */
+  body.brandsMode { background: linear-gradient(180deg,#fbf6f2 0%,#f3ece6 100%); min-height: 100vh; }
+  body.brandsMode h1 { display: none; }
+  .bHead { text-align: center; margin: 6px 0 16px; }
+  .bHead .bsub { font-size: 12px; letter-spacing: 3px; color: #b48a5a; font-weight: 600; }
+  .bHead h2 { font-size: 22px; margin: 6px 0 4px; color: #4a3530; }
+  .bHead p { font-size: 13px; color: #8c7a74; margin: 0; }
+  .bTrack { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+            padding: 6px 7.5% 16px; margin: 0 -16px; scrollbar-width: none; align-items: flex-start; }
+  .bTrack::-webkit-scrollbar { display: none; }
+  .bCard { flex: 0 0 85%; scroll-snap-align: center; background: #fff; border-radius: 22px; overflow: hidden;
+           box-shadow: 0 10px 26px rgba(90,60,50,.12); display: flex; flex-direction: column; }
+  .bImg { aspect-ratio: 900 / 490; background: #eee center / cover no-repeat; position: relative; display: flex;
+          align-items: center; justify-content: center; }
+  .bImg .ini { font-size: 54px; font-weight: 800; color: rgba(255,255,255,.92); letter-spacing: 2px; }
+  .bImg .tag { position: absolute; left: 12px; top: 12px; background: #e8799a; color: #fff; font-size: 12px; font-weight: 700;
+               padding: 4px 10px; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+  .bBody { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
+  .bCat { font-size: 12px; color: #b48a5a; font-weight: 600; letter-spacing: 1px; }
+  .bName { font-size: 20px; font-weight: 800; color: #3d2b27; margin: 4px 0 8px; }
+  .bIntro { font-size: 14px; line-height: 1.7; color: #5d4d49; flex: 1; white-space: pre-line; }
+  .bBtns { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .bBtn { display: block; text-align: center; padding: 11px; border-radius: 12px; font-size: 15px; font-weight: 600;
+          text-decoration: none; border: 1px solid #e3d3cc; color: #6e4b45; background: #fff; }
+  .bBtn.line { background: #06c755; border-color: #06c755; color: #fff; }
+  .bBtn.book { background: #6e4b45; border-color: #6e4b45; color: #fff; }
+  .bInfo { margin-top: 12px; border-top: 1px dashed #eadbd4; padding-top: 10px; }
+  .bRow { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; line-height: 1.55; color: #5d4d49;
+          padding: 5px 0; text-decoration: none; }
+  .bRow svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 2px; fill: #b48a5a; }
+  .bRow b { color: #3d2b27; font-weight: 700; margin-right: 4px; }
+  .bRow .tel { color: #2f7d5a; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .bRow .adr { color: #5d4d49; text-decoration: underline; text-decoration-color: #e3d3cc; text-underline-offset: 3px; }
+  .bRow[hidden] { display: none; }
+  .bLoc + .bLoc { border-top: 1px solid #f4ece8; }
+  .bMore { display: block; width: 100%; margin-top: 4px; padding: 8px; border: 0; background: #f7f0ec; color: #8a6a5f;
+           border-radius: 10px; font-size: 13px; font-weight: 600; }
+  .bDots { display: flex; justify-content: center; gap: 6px; margin-top: 2px; }
+  .bDots i { width: 7px; height: 7px; border-radius: 50%; background: #dccbc4; transition: all .25s; }
+  .bDots i.on { width: 20px; border-radius: 4px; background: #b48a5a; }
+  .bSwipe { text-align: center; font-size: 12px; color: #a99690; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -155,6 +197,18 @@
     </div>
     <button id="joinBtn" class="jbtn" type="button">立即加入會員 ♡</button>
     <p class="jhint">填寫資料只要 <em>1 分鐘</em>，介紹朋友還有現金回饋喔</p>
+  </div>
+
+  <!-- ===== 關係企業品牌服務 ===== -->
+  <div id="brandsView" class="hidden">
+    <div class="bHead">
+      <div class="bsub">沐森集團</div>
+      <h2>關係企業品牌服務</h2>
+      <p>認識集團旗下的好夥伴</p>
+    </div>
+    <div id="bTrack" class="bTrack"></div>
+    <div id="bDots" class="bDots"></div>
+    <div class="bSwipe">← 左右滑動看更多 →</div>
   </div>
 
   <!-- ===== 已綁定：我的優惠（只顯示自己卡別） ===== -->
@@ -290,6 +344,16 @@
   // ============================
 
   const $ = id => document.getElementById(id);
+
+  // 讀取 ?page=offers / ?page=brands；LINE 轉址時參數可能包在 liff.state 裡
+  function readPage() {
+    const q = new URLSearchParams(location.search);
+    let p = q.get('page');
+    const st = q.get('liff.state');
+    if (!p && st) p = new URLSearchParams(st.slice(st.indexOf('?') + 1)).get('page');
+    return p || '';
+  }
+  const START_PAGE = readPage();
   let idToken = '';
   let me = null;
 
@@ -312,8 +376,9 @@
   }
 
   function show(view) {
-    ['loading', 'joinView', 'formView', 'cardView', 'offersView'].forEach(v => $(v).classList.toggle('hidden', v !== view));
+    ['loading', 'joinView', 'formView', 'cardView', 'offersView', 'brandsView'].forEach(v => $(v).classList.toggle('hidden', v !== view));
     document.body.classList.toggle('joinMode', view === 'joinView');
+    document.body.classList.toggle('brandsMode', view === 'brandsView');
     window.scrollTo(0, 0);
   }
 
@@ -344,6 +409,95 @@
       $('loading').textContent = '連線失敗，請稍後再試';
     }
   }
+
+  // 關係企業品牌服務：讀「品牌介紹」分頁，做成左右滑動卡片
+  const B_COLORS = ['#d98fa0', '#8fb59a', '#a98fd0', '#7fa9cf', '#d4a96a', '#9aa0a8', '#c98f7a', '#7fb8b2'];
+  function safeUrl(u) {
+    u = String(u || '').trim();
+    if (!u) return '';
+    if (/^@/.test(u)) return 'https://line.me/R/ti/p/' + encodeURIComponent(u);   // 只填 @帳號 也可以
+    return /^https?:\/\//i.test(u) ? u : '';
+  }
+  function imgUrl(u) {
+    u = String(u || '').trim();
+    if (!u) return '';
+    if (/^https?:\/\//i.test(u)) return u;
+    return /^[\w.\-]+$/.test(u) ? u : '';    // 只填檔名 → 用 GitHub 同資料夾裡的圖片
+  }
+  const ICON_TEL = '<svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 006.6 6.6l2.2-2.2a1 1 0 011-.25 11.4 11.4 0 003.6.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.25 1z"/></svg>';
+  const ICON_PIN = '<svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 1112 6.5a2.5 2.5 0 010 5z"/></svg>';
+  const SHOW_LOC = 3;   // 分店超過 3 間時，先顯示 3 間，其餘按「顯示全部」
+  const telLink = p => '<a class="tel" href="tel:' + esc(String(p).replace(/[^\d+#]/g, '')) + '">' + esc(p) + '</a>';
+  const mapUrl = a => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a);
+  function infoHtml(b, i) {
+    const locs = b.locations || [];
+    if (!b.phone && !locs.length) return '';
+    let h = '<div class="bInfo">';
+    if (b.phone) h += '<div class="bRow">' + ICON_TEL + '<span>' + telLink(b.phone) + '</span></div>';
+    locs.forEach((l, k) => {
+      h += '<div class="bRow bLoc"' + (k >= SHOW_LOC ? ' hidden' : '') + '>' + ICON_PIN + '<span>' +
+        (l.name ? '<b>' + esc(l.name) + '</b>' : '') +
+        '<a class="adr" href="' + esc(mapUrl(l.address)) + '" data-url="' + esc(mapUrl(l.address)) + '">' + esc(l.address) + '</a>' +
+        (l.phone ? '<br>' + telLink(l.phone) : '') + '</span></div>';
+    });
+    if (locs.length > SHOW_LOC) h += '<button class="bMore" type="button" data-n="' + locs.length + '">顯示全部 ' + locs.length + ' 間門市 ▾</button>';
+    return h + '</div>';
+  }
+  async function loadBrands() {
+    $('loading').textContent = '載入品牌中…';
+    show('loading');
+    try {
+      const r = await api('brands');
+      const list = (r && r.brands) || [];
+      if (!list.length) { $('loading').textContent = '品牌介紹準備中，敬請期待'; return; }
+      $('bTrack').innerHTML = list.map((b, i) => {
+        const img = imgUrl(b.image);
+        const bg = img ? 'background-image:url(\'' + encodeURI(img) + '\')' : 'background:' + B_COLORS[i % B_COLORS.length];
+        // 「立即預約」按鈕暫時不顯示；要恢復時把下一行的 // 拿掉
+        const btns = [
+          // [safeUrl(b.booking), '立即預約', 'book'],
+          [safeUrl(b.line), '加入官方 LINE', 'line'],
+          [safeUrl(b.website), '前往官網', ''],
+        ].filter(x => x[0]).map(x => '<a class="bBtn ' + x[2] + '" href="' + esc(x[0]) + '" data-url="' + esc(x[0]) + '">' + x[1] + '</a>').join('');
+        return '<div class="bCard"><div class="bImg" style="' + bg + '">' +
+          (img ? '' : '<span class="ini">' + esc(b.name.slice(0, 2)) + '</span>') +
+          (b.hasOffer ? '<span class="tag">會員專屬禮遇</span>' : '') + '</div>' +
+          '<div class="bBody">' + (b.category ? '<div class="bCat">' + esc(b.category) + '</div>' : '') +
+          '<div class="bName">' + esc(b.name) + '</div><div class="bIntro">' + esc(b.intro) + '</div>' +
+          infoHtml(b, i) +
+          (btns ? '<div class="bBtns">' + btns + '</div>' : '') + '</div></div>';
+      }).join('');
+      $('bDots').innerHTML = list.map((_, i) => '<i' + (i ? '' : ' class="on"') + '></i>').join('');
+      show('brandsView');
+    } catch (err) {
+      $('loading').textContent = '連線失敗，請稍後再試';
+    }
+  }
+  // 滑動時更新下方小圓點
+  $('bTrack').addEventListener('scroll', () => {
+    const t = $('bTrack'), cards = t.children;
+    if (!cards.length) return;
+    const w = cards[0].offsetWidth + 14;
+    const i = Math.round(t.scrollLeft / w);
+    [...$('bDots').children].forEach((d, k) => d.classList.toggle('on', k === i));
+  }, { passive: true });
+  // 連結：LINE 帳號在 LINE 裡開，其他網站用外部瀏覽器開
+  $('bTrack').addEventListener('click', e => {
+    const more = e.target.closest('.bMore');
+    if (more) {
+      const box = more.parentElement, open = more.dataset.open === '1';
+      box.querySelectorAll('.bLoc').forEach((el, k) => { el.hidden = !open ? false : k >= SHOW_LOC; });
+      more.dataset.open = open ? '' : '1';
+      more.textContent = open ? '顯示全部 ' + more.dataset.n + ' 間門市 ▾' : '收合 ▴';
+      return;
+    }
+    const a = e.target.closest('a[data-url]');
+    if (!a) return;
+    e.preventDefault();
+    const url = a.dataset.url;
+    try { liff.openWindow({ url, external: !/line\.me/.test(url) }); }
+    catch (err) { window.open(url, '_blank'); }
+  });
 
   $('offersBtn').onclick = loadOffers;
   $('backCard').onclick = () => { if (me) showCard(me); };
@@ -449,10 +603,13 @@
       await liff.init({ liffId: LIFF_ID });
       if (!liff.isLoggedIn()) { liff.login(); return; }
       idToken = liff.getIDToken();
+      const page = readPage() || START_PAGE;
+      // 從圖文選單「關係企業品牌服務」進來：https://liff.line.me/LIFF_ID?page=brands（不需要是會員）
+      if (page === 'brands') { loadBrands(); return; }
       const r = await api('me');
       if (!r.ok) { show('formView'); $('regErr').textContent = r.error; return; }
       // 從圖文選單「優惠」進來：https://liff.line.me/LIFF_ID?page=offers
-      const wantOffers = new URLSearchParams(location.search).get('page') === 'offers';
+      const wantOffers = page === 'offers';
       if (r.bound) {
         showCard(r.member);
         if (wantOffers) loadOffers();
